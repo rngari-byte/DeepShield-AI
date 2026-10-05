@@ -56,4 +56,15 @@ Confirming the content script actually loads on Instagram's page (added a consol
 Need to confirm badges appear once the content script is confirmed running, then test the full click → detect → result flow end-to-end.
 www. vs non-www. URL variants for Instagram/TikTok have already been added to the manifest to avoid missed matches.
 
+Known issues / in progress Confirming the content script actually loads on Instagram's page (added a console log for verification). Need to confirm badges appear once the content script is confirmed running, then test the full click → detect → result flow end-to-end. www. vs non-www. URL variants for Instagram/TikTok have already been added to the manifest to avoid missed matches.
+
+Week 3-4: Bug fix and a mid-project pivot Found and fixed the badge bug: the content script was marking images as "already processed" before actually deciding whether to badge them, so every single badge was being silently skipped. Restructured the image-tracking logic so the badge decision happens first. Confirmed working — the "AI?" badge now appears correctly across Instagram, including on posts, stories, and profile pictures.
+
+Hive AI authentication issue: after fixing the badge, testing surfaced a persistent "Invalid Auth Token" error from Hive's API. This held up across three separate fix attempts — generating a correct V3 (not V2) API key, rewriting the backend to match Hive's actual V3 request/response format, and exposing the correct port on the Replit deployment. The error pattern (a correctly-formatted key being rejected every time, while Hive's own logged-in Playground worked fine) pointed to an account/project permissions issue on Hive's side rather than something fixable from the client.
+
+Decision: switched the backend's detection API from Hive AI to Sightengine's AI-Generated Image Detection API (genai model), which uses a simpler API user/secret authentication scheme. This worked correctly once configured, without the account-level issues hit with Hive.
+
+End-to-end pipeline confirmed working: clicking the "AI?" badge on a real Instagram image now returns a live confidence score from the backend, routed through Sightengine.
+
+Updated known issues / in progress Error handling returns a visible "!" on failure, but the underlying error message shown to the user could be clearer. Accuracy testing against transformed images (screenshots, compression, resizing), per the original weeks 7–8 plan, has not started yet. The Technology Stack and How It Works sections above still describe the original Hive AI integration; functionally, Sightengine now fills that role using the same backend structure (request routing, confidence score simplification) described there.
 
