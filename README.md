@@ -53,10 +53,8 @@ Currently debugging: the badge is not yet appearing on Instagram — narrowing d
 
 Known issues / in progress
 Confirming the content script actually loads on Instagram's page (added a console log for verification).
-Need to confirm badges appear once the content script is confirmed running, then test the full click → detect → result flow end-to-end.
+Need to confirm badges appear once the content script is confirmed running, then test the full click - detect - result flow end-to-end.
 www. vs non-www. URL variants for Instagram/TikTok have already been added to the manifest to avoid missed matches.
-
-Known issues / in progress Confirming the content script actually loads on Instagram's page (added a console log for verification). Need to confirm badges appear once the content script is confirmed running, then test the full click → detect → result flow end-to-end. www. vs non-www. URL variants for Instagram/TikTok have already been added to the manifest to avoid missed matches.
 
 Week 3-4: Bug fix and a mid-project pivot Found and fixed the badge bug: the content script was marking images as "already processed" before actually deciding whether to badge them, so every single badge was being silently skipped. Restructured the image-tracking logic so the badge decision happens first. Confirmed working — the "AI?" badge now appears correctly across Instagram, including on posts, stories, and profile pictures.
 
