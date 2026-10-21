@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "AI Image Checker",
+  "version": "0.2.0",
+  "description": "Check if images are AI-generated. Badges on supported social/news sites, right-click everywhere else.",
+  "permissions": ["storage", "activeTab", "contextMenus"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://ai-image-detector-backend--rngari.replit.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
