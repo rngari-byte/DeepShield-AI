@@ -1,36 +1,56 @@
-// background.js
-// Receives detection requests from content scripts and forwards them to
-// our own backend server (which in turn calls the Hive AI-detection API).
-// We never call Hive directly from the extension so the API key stays
-// server-side, not exposed in extension code that anyone can inspect.
+const DEFAULT_BACKEND_URL =
+  "https://ai-image-detector-backend--rngari.replit.app";
 
-const DEFAULT_BACKEND_URL = "http://localhost:3000/detect";
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type !== "DETECT_IMAGE") return false;
-
-  chrome.storage.sync.get(["backendUrl"], async ({ backendUrl }) => {
-    const url = backendUrl || DEFAULT_BACKEND_URL;
-
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: message.imageUrl }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        sendResponse({ error: `Backend error (${res.status}): ${text}` });
-        return;
-      }
-
-      const data = await res.json();
-      sendResponse(data); // expects { label, confidence }
-    } catch (err) {
-      sendResponse({ error: `Could not reach backend: ${err.message}` });
-    }
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "check-ai-image",
+    title: "Check if AI-generated",
+    contexts: ["image"],
   });
-
-  return true; // keep the message channel open for the async response
 });
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId !== "check-ai-image" || !info.srcUrl || !tab?.id) return;
+  detectImage(info.srcUrl).then((result) => {
+    chrome.tabs
+      .sendMessage(tab.id, { type: "SHOW_DETECTION_TOAST", result })
+      .catch(() => {});
+  });
+});
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type !== "DETECT_IMAGE") return false;
+  detectImage(message.imageUrl).then(sendResponse);
+  return true;
+});
+
+async function detectImage(imageUrl) {
+  const { backendUrl } = await chrome.storage.sync.get(["backendUrl"]);
+  const url = backendUrl || DEFAULT_BACKEND_URL;
+
+  // 8-second timeout so requests don't hang if Replit server is sleeping
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const text = await res.text();
+      return { error: `Backend error (${res.status}): ${text}` };
+    }
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      return { error: "Server timed out. It might be waking up—please try again in a few seconds." };
+    }
+    return { error: `Could not reach backend: ${err.message}` };
+  }
+}
