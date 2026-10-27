@@ -64,7 +64,7 @@ The entire backend infrastructure for DeepShield AI is built and deployed on **R
 4. **Interactive Results:** Renders an animated confidence meter showing exact probability scores, classification labels, and the active scanning engine (Hive AI or Sightengine).
 ---
 
-## 📈 Progress Log
+## Progress Log
 
 ### Week 1–2: Extension Skeleton & Backend Wiring
 
@@ -114,7 +114,7 @@ The entire backend infrastructure for DeepShield AI is built and deployed on **R
 * [ ] Add backend support for direct image file uploads to allow checking screenshots and session-locked social media links.
 * [ ] Build a standalone web portal where users can paste URLs or drag-and-drop images to test them directly without installing the extension.
 
-## 📈 Progress Log (Weeks 6-7)
+### Weeks 6-7
 
 ### The Pivot: From Extension Issues to Dual System
 
